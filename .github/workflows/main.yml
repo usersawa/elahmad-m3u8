@@ -1,9 +1,9 @@
-name: Fetch M3U8 Links with Puppeteer
+name: Fetch M3U8 mbc_variety
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:    # تشغيل يدوي
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "*/30 * * * *"  # كل 30 دقيقة
 
 jobs:
   update-json:
@@ -20,13 +20,13 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Fetch M3U8 using Puppeteer
+      - name: Fetch M3U8 mbc_variety using Puppeteer
         run: node fetch.js
 
       - name: Commit and push changes
         run: |
           git config user.name "github-actions"
           git config user.email "action@github.com"
-          git add data/*.json
-          git commit -m "Update M3U8 links" || exit 0
+          git add data/mbc_variety.json
+          git commit -m "Update mbc_variety JSON" || exit 0
           git push
