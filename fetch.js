@@ -2,23 +2,26 @@ const puppeteer = require("puppeteer");
 const fs = require("fs");
 
 (async () => {
-  const url = "https://www.elahmad.com/tv/mobiletv/glarb.php?id=mbc_variety";
+  const url =
+    "https://www.elahmad.com/tv/mobiletv/glarb.php?id=mbc_variety";
 
   const browser = await puppeteer.launch({
     headless: "new",
-    args: ["--no-sandbox"]
+    args: ["--no-sandbox"],
   });
 
   const page = await browser.newPage();
 
   let foundM3U8 = "";
 
-  // اعتراض الشبكة
-  page.on("request", req => {
+  // التقاط طلبات الشبكة
+  page.on("request", (req) => {
     const u = req.url();
     if (u.includes(".m3u8")) {
       console.log("FOUND:", u);
-      if (!foundM3U8) foundM3U8 = u;
+      if (!foundM3U8) {
+        foundM3U8 = u;
+      }
     }
   });
 
@@ -27,14 +30,30 @@ const fs = require("fs");
   );
 
   try {
-    await page.goto(url, { waitUntil: "networkidle2", timeout: 80000 });
+    await page.goto(url, {
+      waitUntil: "networkidle2",
+      timeout: 80000,
+    });
 
-    // الانتظار قليلاً لتحميل المشغل
-    await page.waitForTimeout(7000);
+    // انتظار تحميل المشغل
+    await page.waitForTimeout(8000);
 
-    if (!fs.existsSync("data")) fs.mkdirSync("data");
+    if (!fs.existsSync("data")) {
+      fs.mkdirSync("data");
+    }
 
     fs.writeFileSync(
+      "data/mbc_variety.json",
+      JSON.stringify({ link: foundM3U8 }, null, 2)
+    );
+
+    console.log("Extracted m3u8:", foundM3U8);
+  } catch (err) {
+    console.error("Error:", err);
+  }
+
+  await browser.close();
+})();    fs.writeFileSync(
       "data/mbc_variety.json",
       JSON.stringify({ link: foundM3U8 }, null, 2)
     );
