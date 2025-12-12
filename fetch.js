@@ -53,27 +53,4 @@ const fs = require("fs");
   }
 
   await browser.close();
-})();    fs.writeFileSync(
-      "data/mbc_variety.json",
-      JSON.stringify({ link: foundM3U8 }, null, 2)
-    );
-
-    console.log("Extracted:", foundM3U8);
-   catch (err) {
-    console.log("Error:", err);
-  }
-
-  await browser.close();
-})();
-    fs.writeFileSync(
-      "data/mbc_variety.json",
-      JSON.stringify({ link: m3u8 }, null, 2)
-    );
-
-    console.log("Extracted m3u8:", m3u8);
-  } catch (err) {
-    console.log("Error:", err);
-  }
-
-  await browser.close();
 })();
