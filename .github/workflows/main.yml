@@ -1,0 +1,28 @@
+name: Fetch M3U8
+
+on:
+  workflow_dispatch:    # تشغيل يدوي
+  schedule:
+    - cron: "*/10 * * * *"   # كل 10 دقائق
+
+jobs:
+  update-file:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Get M3U8 Link
+        run: |
+          URL="https://www.elahmad.com/tv/mobiletv/glarb.php?id=mbc_variety"
+          PAGE=$(curl -A "Mozilla/5.0" "$URL")
+          LINK=$(echo "$PAGE" | grep -o 'https[^"]*\.m3u8' | head -1)
+          echo "{\"link\": \"$LINK\"}" > data/mbc_variety.json
+
+      - name: Push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "action@github.com"
+          git add data/*.json
+          git commit -m "Update m3u8" || exit 0
+          git push
