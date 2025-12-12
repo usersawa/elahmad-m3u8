@@ -14,11 +14,11 @@ const fs = require("fs");
 
   let foundM3U8 = "";
 
-  // اعتراض طلبات الشبكة
-  page.on("request", (req) => {
-    const u = req.url();
+  // اعتراض الردود (الأهم)
+  page.on("response", async (res) => {
+    const u = res.url();
     if (u.includes(".m3u8")) {
-      console.log("FOUND:", u);
+      console.log("FOUND M3U8:", u);
       if (!foundM3U8) foundM3U8 = u;
     }
   });
@@ -28,26 +28,33 @@ const fs = require("fs");
   );
 
   try {
-    await page.goto(url, {
-      waitUntil: "networkidle2",
-      timeout: 80000,
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90000 });
+
+    // انتظار أي iframe أو فيديو
+    await new Promise((r) => setTimeout(r, 5000));
+
+    // محاولة تشغيل الفيديو تلقائيًا
+    await page.evaluate(() => {
+      const video = document.querySelector("video");
+      if (video) {
+        video.muted = true;
+        video.play().catch(() => {});
+      }
     });
 
-    // انتظار تحميل المشغل (بديل waitForTimeout)
-    await new Promise(resolve => setTimeout(resolve, 8000));
+    // انتظار تحميل الشبكة بعد التشغيل
+    await new Promise((r) => setTimeout(r, 10000));
 
-    if (!fs.existsSync("data")) {
-      fs.mkdirSync("data");
-    }
+    if (!fs.existsSync("data")) fs.mkdirSync("data");
 
     fs.writeFileSync(
       "data/mbc_variety.json",
       JSON.stringify({ link: foundM3U8 }, null, 2)
     );
 
-    console.log("Extracted m3u8:", foundM3U8);
+    console.log("FINAL m3u8:", foundM3U8);
   } catch (err) {
-    console.error("Error:", err);
+    console.error("ERROR:", err);
   }
 
   await browser.close();
