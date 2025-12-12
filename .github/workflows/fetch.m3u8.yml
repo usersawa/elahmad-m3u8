@@ -1,16 +1,19 @@
 name: Fetch M3U8 mbc_variety
 
 on:
-  workflow_dispatch:    # تشغيل يدوي
+  workflow_dispatch:
   schedule:
-    - cron: "*/30 * * * *"  # كل 30 دقيقة
+    - cron: "*/30 * * * *"
 
 jobs:
   update-json:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}  # يسمح بالـ push
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
