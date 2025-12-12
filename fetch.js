@@ -14,14 +14,12 @@ const fs = require("fs");
 
   let foundM3U8 = "";
 
-  // التقاط طلبات الشبكة
+  // اعتراض طلبات الشبكة
   page.on("request", (req) => {
     const u = req.url();
     if (u.includes(".m3u8")) {
       console.log("FOUND:", u);
-      if (!foundM3U8) {
-        foundM3U8 = u;
-      }
+      if (!foundM3U8) foundM3U8 = u;
     }
   });
 
@@ -35,8 +33,8 @@ const fs = require("fs");
       timeout: 80000,
     });
 
-    // انتظار تحميل المشغل
-    await page.waitForTimeout(8000);
+    // انتظار تحميل المشغل (بديل waitForTimeout)
+    await new Promise(resolve => setTimeout(resolve, 8000));
 
     if (!fs.existsSync("data")) {
       fs.mkdirSync("data");
