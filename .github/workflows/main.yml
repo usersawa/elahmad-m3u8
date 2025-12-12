@@ -1,4 +1,4 @@
-name: Fetch M3U8 Links
+name: Fetch M3U8 Links with Puppeteer
 
 on:
   workflow_dispatch:
@@ -9,34 +9,21 @@ jobs:
   update-json:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Create data folder
-        run: mkdir -p data
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
-      - name: Fetch M3U8 for channels
-        run: |
-          declare -A channels
-          channels=(
-            ["mbc_variety"]="https://www.elahmad.com/tv/mobiletv/glarb.php?id=mbc_variety"
-            ["mbc1"]="https://www.elahmad.com/tv/mobiletv/glarb.php?id=mbc1"
-            ["mbc2"]="https://www.elahmad.com/tv/mobiletv/glarb.php?id=mbc2"
-          )
+      - name: Install dependencies
+        run: npm install
 
-          for name in "${!channels[@]}"; do
-            URL="${channels[$name]}"
-            PAGE=$(curl -s -A "Mozilla/5.0" -e "https://www.elahmad.com/" "$URL")
-            LINK=$(echo "$PAGE" | grep -o 'https[^"]*\.m3u8' | head -1)
-            if [ -n "$LINK" ]; then
-              echo "{\"link\": \"$LINK\"}" > data/${name}.json
-              echo "Updated $name -> $LINK"
-            else
-              echo "{\"link\": \"\"}" > data/${name}.json
-              echo "No M3U8 found for $name"
-            fi
-          done
+      - name: Fetch M3U8 using Puppeteer
+        run: node fetch.js
 
-      - name: Commit and push
+      - name: Commit and push changes
         run: |
           git config user.name "github-actions"
           git config user.email "action@github.com"
