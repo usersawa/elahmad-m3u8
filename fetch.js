@@ -3,7 +3,7 @@ const fs = require("fs");
 
 (async () => {
   const url =
-    "https://www.elahmad.com/tv/mobiletv/glarb.php?id=mbc_variety";
+    "https://www.wohotv.com/android/tv/الإخبارية-السورية/793";
 
   const browser = await puppeteer.launch({
     headless: "new",
