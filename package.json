@@ -1,0 +1,7 @@
+{
+  "name": "fetch-m3u8",
+  "version": "1.0.0",
+  "dependencies": {
+    "puppeteer": "^21.0.0"
+  }
+}
