@@ -4,27 +4,30 @@ const fs = require('fs');
 (async () => {
   const url = "https://www.elahmad.com/tv/mobiletv/glarb.php?id=mbc_variety";
 
-  const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+  const browser = await puppeteer.launch({ args: ['--no-sandbox'], headless: "new" });
   const page = await browser.newPage();
 
   try {
     await page.goto(url, { waitUntil: 'networkidle2' });
 
-    // البحث عن أي رابط m3u8 في الفيديو أو source
+    // البحث عن رابط m3u8 داخل أي <script> يحتوي على ".m3u8"
     const m3u8 = await page.evaluate(() => {
-      const links = Array.from(document.querySelectorAll('video, source'))
-        .map(v => v.src || v.getAttribute('src'))
-        .filter(src => src && src.endsWith('.m3u8'));
-      return links[0] || '';
+      const script = Array.from(document.scripts)
+        .map(s => s.textContent)
+        .find(t => t.includes(".m3u8"));
+      const match = script?.match(/https?:\/\/[^'"]+\.m3u8/);
+      return match ? match[0] : "";
     });
 
-    const data = { link: m3u8 };
+    // إنشاء مجلد data إذا لم يكن موجود
     if (!fs.existsSync('data')) fs.mkdirSync('data');
-    fs.writeFileSync(`data/mbc_variety.json`, JSON.stringify(data));
 
+    // كتابة JSON
+    fs.writeFileSync(`data/mbc_variety.json`, JSON.stringify({ link: m3u8 }));
     console.log(`Updated mbc_variety: ${m3u8}`);
   } catch (e) {
     console.log("Error fetching mbc_variety:", e);
+    fs.writeFileSync(`data/mbc_variety.json`, JSON.stringify({ link: "" }));
   }
 
   await browser.close();
