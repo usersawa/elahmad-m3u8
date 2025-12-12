@@ -6,35 +6,46 @@ const fs = require("fs");
 
   const browser = await puppeteer.launch({
     headless: "new",
-    args: ["--no-sandbox"],
+    args: ["--no-sandbox"]
   });
 
   const page = await browser.newPage();
+
+  let foundM3U8 = "";
+
+  // اعتراض الشبكة
+  page.on("request", req => {
+    const u = req.url();
+    if (u.includes(".m3u8")) {
+      console.log("FOUND:", u);
+      if (!foundM3U8) foundM3U8 = u;
+    }
+  });
+
   await page.setUserAgent(
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
   );
 
   try {
-    await page.goto(url, { waitUntil: "networkidle2", timeout: 70000 });
+    await page.goto(url, { waitUntil: "networkidle2", timeout: 80000 });
 
-    // نبحث داخل كل السكربتات والملفات المحملة
-    const m3u8 = await page.evaluate(() => {
-      const scripts = Array.from(document.querySelectorAll("script"));
-
-      for (const s of scripts) {
-        const txt = s.textContent;
-        if (txt && txt.includes(".m3u8")) {
-          const match = txt.match(/https?:\/\/[^'"]+\.m3u8/);
-          if (match) return match[0];
-        }
-      }
-
-      // محاولة ثانية: الروابط القادمة من الشبكة
-      return "";
-    });
+    // الانتظار قليلاً لتحميل المشغل
+    await page.waitForTimeout(7000);
 
     if (!fs.existsSync("data")) fs.mkdirSync("data");
 
+    fs.writeFileSync(
+      "data/mbc_variety.json",
+      JSON.stringify({ link: foundM3U8 }, null, 2)
+    );
+
+    console.log("Extracted:", foundM3U8);
+  } catch (err) {
+    console.log("Error:", err);
+  }
+
+  await browser.close();
+})();
     fs.writeFileSync(
       "data/mbc_variety.json",
       JSON.stringify({ link: m3u8 }, null, 2)
