@@ -59,7 +59,7 @@ const fs = require("fs");
     );
 
     console.log("Extracted:", foundM3U8);
-  } catch (err) {
+   catch (err) {
     console.log("Error:", err);
   }
 
