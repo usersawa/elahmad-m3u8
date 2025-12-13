@@ -3,7 +3,7 @@ const fs = require("fs");
 
 (async () => {
   const url =
-    "https://www.wohotv.com/android/tv/الإخبارية-السورية/793";
+    "https://games1.elahmad.xyz/tv770_www.elahmad.com_mbc_variety/index.m3u8?token=17f8ed6103e072ca4dd5855fbcf822bf9bb00d7b-f2e8f7f50ae267c433f6a0e76c207da2-1765636610-1765625810";
 
   const browser = await puppeteer.launch({
     headless: "new",
