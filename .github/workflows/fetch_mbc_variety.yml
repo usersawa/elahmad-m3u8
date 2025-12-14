@@ -1,17 +1,17 @@
-name: Fetch dynamic m3u8
+name: Fetch YouTube Video Link
 
 on:
   workflow_dispatch:
 
 jobs:
-  fetch-m3u8:
+  fetch-link:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -22,19 +22,20 @@ jobs:
           sudo apt install -y yt-dlp
           yt-dlp --version
 
-      - name: Fetch latest m3u8
+      - name: Fetch video link dynamically
         run: |
           node -e "
           const { execSync } = require('child_process');
           const fs = require('fs');
-          const url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'; // ضع رابطك هنا
+          const url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'; // ضع رابط الفيديو هنا
           try {
-            const m3u8 = execSync(\`yt-dlp -g -f hls '\${url}'\`).toString().trim();
+            // بدون HLS، أفضل رابط mp4/webm
+            const link = execSync(\`yt-dlp -g '\${url}'\`).toString().trim();
             if (!fs.existsSync('data')) fs.mkdirSync('data');
-            fs.writeFileSync('data/mbc_variety.json', JSON.stringify({ m3u8 }, null, 2));
-            console.log('m3u8 fetched:', m3u8);
+            fs.writeFileSync('data/mbc_variety.json', JSON.stringify({ link }, null, 2));
+            console.log('Video link fetched:', link);
           } catch(e) {
-            console.error('Failed to fetch m3u8:', e.message);
+            console.error('Failed to fetch link:', e.message);
             process.exit(1);
           }
           "
@@ -44,5 +45,5 @@ jobs:
           git config user.name "github-actions"
           git config user.email "action@github.com"
           git add data/mbc_variety.json
-          git commit -m "Update m3u8 JSON" || exit 0
+          git commit -m "Update YouTube link JSON" || exit 0
           git push
