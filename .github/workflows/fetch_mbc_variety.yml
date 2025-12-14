@@ -27,7 +27,7 @@ jobs:
           node -e "
           const { execSync } = require('child_process');
           const fs = require('fs');
-          const url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'; // ضع رابط الفيديو هنا
+          const url = 'https://m.youtube.com/watch?v=rPa81EdjTqY'; // ضع رابط الفيديو هنا
           try {
             // بدون HLS، أفضل رابط mp4/webm
             const link = execSync(\`yt-dlp -g '\${url}'\`).toString().trim();
