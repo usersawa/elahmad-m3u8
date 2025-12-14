@@ -11,12 +11,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
 
@@ -26,21 +26,9 @@ jobs:
           sudo apt install -y yt-dlp
           yt-dlp --version
 
-      - name: Fetch M3U8 using yt-dlp
+      - name: Fetch M3U8 with headers + geo-bypass
         run: |
-          node -e "
-          const { execSync } = require('child_process');
-          const fs = require('fs');
-          const url = 'https://www.elahmad.com/tv/live/shahid_shaka.php?id=mbc_max';
-          try {
-            const m3u8 = execSync(\`yt-dlp -g '\${url}'\`).toString().trim();
-            fs.writeFileSync('data/mbc_variety.json', JSON.stringify({ m3u8 }, null, 2));
-            console.log('Saved m3u8:', m3u8);
-          } catch(e) {
-            console.error('Failed to fetch m3u8:', e.message);
-            process.exit(1);
-          }
-          "
+          node fetch_m3u8.js
 
       - name: Commit and push changes
         run: |
