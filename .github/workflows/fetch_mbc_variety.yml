@@ -27,12 +27,15 @@ jobs:
           node -e "
           const { execSync } = require('child_process');
           const fs = require('fs');
-          const url = 'https://m.youtube.com/watch?v=HJtPdTDay9s'; // ضع رابط الفيديو هنا
+
+          // ضع هنا رابط الفيديو أو الشورت
+          const url = 'https://www.youtube.com/shorts/dQw4w9WgXcQ';
+
           try {
-            // بدون HLS، أفضل رابط mp4/webm
+            // استخدم yt-dlp للحصول على الرابط المباشر
             const link = execSync(\`yt-dlp -g '\${url}'\`).toString().trim();
             if (!fs.existsSync('data')) fs.mkdirSync('data');
-            fs.writeFileSync('data/mbc_variety.json', JSON.stringify({ link }, null, 2));
+            fs.writeFileSync('data/video_link.json', JSON.stringify({ link }, null, 2));
             console.log('Video link fetched:', link);
           } catch(e) {
             console.error('Failed to fetch link:', e.message);
@@ -44,6 +47,6 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "action@github.com"
-          git add data/mbc_variety.json
-          git commit -m "Update YouTube link JSON" || exit 0
+          git add data/video_link.json
+          git commit -m "Update YouTube video link" || exit 0
           git push
