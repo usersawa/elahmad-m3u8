@@ -1,7 +1,7 @@
 const { execSync } = require("child_process");
 const fs = require("fs");
 
-const url = "https://m.youtube.com/watch?v=lVZsKA_phWA"; // رابط الفيديو
+const url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"; // رابط الفيديو
 
 try {
   const m3u8 = execSync(`yt-dlp -g "${url}"`).toString().trim();
