@@ -1,7 +1,12 @@
 {
-  "name": "fetch-m3u8",
+  "name": "hls-proxy",
   "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
-    "puppeteer": "^24.6.0"
+    "express": "^4.18.2",
+    "node-fetch": "^2.6.7"
   }
 }
