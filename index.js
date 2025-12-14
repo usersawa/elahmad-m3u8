@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 const app = express();
 
 // رابط m3u8 الأصلي (ضع الرابط الجديد عند انتهاء صلاحية الـ Token)
-const TARGET_URL = "https://games2.elahmad.xyz/tv770_www.elahmad.com_alikhbaria_syria/tracks-v1a1/mono.m3u8?token=31a77ee40e121b03401d6ab160baba33df1bc0bb-b13126b4eba97997817b4ea0d3ccb564-1765733977-1765723177";
+const TARGET_URL = "https://games2.elahmad.xyz/tv770_www.elahmad.com_alikhbaria_syria/tracks-v1a1/mono.m3u8?token=738e7951c4c293263a8c94aaad4e2e79aaa45570-a676fd4687894143bbb75a6953cdf698-1765745018-1765734218";
 
 app.get("*", async (req, res) => {
   try {
