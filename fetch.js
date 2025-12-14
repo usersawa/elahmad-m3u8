@@ -41,11 +41,21 @@ const fs = require("fs");
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
   );
 
+  // دالة تحميل آمنة مع retry
+  async function safeGoto(page, url) {
+    for (let i = 0; i < 3; i++) {
+      try {
+        await page.goto(url, { waitUntil: "domcontentloaded", timeout: 0 });
+        return;
+      } catch (e) {
+        console.log(`Retrying... attempt ${i + 1}`);
+      }
+    }
+    throw new Error("Failed to load page after 3 attempts");
+  }
+
   try {
-    await page.goto(url, {
-      waitUntil: "networkidle2",
-      timeout: 90000,
-    });
+    await safeGoto(page, url);
 
     // انتظار تحميل الإطارات
     await new Promise(r => setTimeout(r, 5000));
@@ -54,6 +64,7 @@ const fs = require("fs");
     const frames = page.frames();
     for (const frame of frames) {
       try {
+        await frame.waitForSelector("video", { timeout: 10000 });
         await frame.evaluate(() => {
           const video = document.querySelector("video");
           if (video) {
@@ -61,7 +72,9 @@ const fs = require("fs");
             video.play().catch(() => {});
           }
         });
-      } catch (e) {}
+      } catch (e) {
+        console.log("No video in this frame or timeout");
+      }
     }
 
     // انتظار توليد روابط البث
