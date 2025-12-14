@@ -48,7 +48,7 @@ const fs = require("fs");
     });
 
     // انتظار تحميل الإطارات
-    await page.waitForTimeout(5000);
+    await new Promise(r => setTimeout(r, 5000));
 
     // البحث داخل جميع الـ iframes وتشغيل الفيديو إن وُجد
     const frames = page.frames();
@@ -65,7 +65,7 @@ const fs = require("fs");
     }
 
     // انتظار توليد روابط البث
-    await page.waitForTimeout(15000);
+    await new Promise(r => setTimeout(r, 15000));
 
     if (!fs.existsSync("data")) fs.mkdirSync("data");
 
