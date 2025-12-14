@@ -1,57 +1,48 @@
-name: Update MBC Variety JSON
+name: Fetch dynamic m3u8
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "*/30 * * * *" # كل 30 دقيقة
 
 jobs:
-  update-json:
+  fetch-m3u8:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 2️⃣ Setup Node.js
-      - name: Setup Node.js
+      - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # 3️⃣ Install yt-dlp
       - name: Install yt-dlp
         run: |
           sudo apt update
           sudo apt install -y yt-dlp
           yt-dlp --version
 
-      # 4️⃣ Fetch m3u8 / mp4 from YouTube and save JSON
-      - name: Fetch m3u8 from YouTube
+      - name: Fetch latest m3u8
         run: |
           node -e "
           const { execSync } = require('child_process');
           const fs = require('fs');
-          const url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'; // رابط فيديو عام
+          const url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'; // ضع رابطك هنا
           try {
-            const m3u8 = execSync(\`yt-dlp -g '\${url}'\`).toString().trim();
+            const m3u8 = execSync(\`yt-dlp -g -f hls '\${url}'\`).toString().trim();
             if (!fs.existsSync('data')) fs.mkdirSync('data');
             fs.writeFileSync('data/mbc_variety.json', JSON.stringify({ m3u8 }, null, 2));
-            console.log('mbc_variety.json updated with m3u8 link:', m3u8);
+            console.log('m3u8 fetched:', m3u8);
           } catch(e) {
             console.error('Failed to fetch m3u8:', e.message);
             process.exit(1);
           }
           "
 
-      # 5️⃣ Commit & push changes
-      - name: Commit and push changes
+      - name: Commit and push JSON
         run: |
           git config user.name "github-actions"
           git config user.email "action@github.com"
           git add data/mbc_variety.json
-          git commit -m "Update mbc_variety JSON" || exit 0
+          git commit -m "Update m3u8 JSON" || exit 0
           git push
