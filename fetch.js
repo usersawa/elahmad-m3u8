@@ -3,7 +3,7 @@ const fs = require("fs");
 
 (async () => {
   const url =
-    "https://games1.elahmad.xyz/tv770_www.elahmad.com_mbc_variety/index.m3u8?token=17f8ed6103e072ca4dd5855fbcf822bf9bb00d7b-f2e8f7f50ae267c433f6a0e76c207da2-1765636610-1765625810";
+    "https://www.elahmad.com/tv/live/shahid_shaka.php?id=mbc_max";
 
   const browser = await puppeteer.launch({
     headless: "new",
