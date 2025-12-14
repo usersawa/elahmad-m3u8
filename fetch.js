@@ -7,19 +7,33 @@ const fs = require("fs");
 
   const browser = await puppeteer.launch({
     headless: "new",
-    args: ["--no-sandbox"],
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-web-security",
+      "--disable-features=IsolateOrigins,site-per-process",
+    ],
   });
 
   const page = await browser.newPage();
 
-  let foundM3U8 = "";
+  let foundM3U8 = new Set();
 
-  // اعتراض الردود (الأهم)
+  // مراقبة كل الردود
   page.on("response", async (res) => {
     const u = res.url();
     if (u.includes(".m3u8")) {
-      console.log("FOUND M3U8:", u);
-      if (!foundM3U8) foundM3U8 = u;
+      console.log("FOUND M3U8 (response):", u);
+      foundM3U8.add(u);
+    }
+  });
+
+  // مراقبة الطلبات أيضًا
+  page.on("request", (req) => {
+    const u = req.url();
+    if (u.includes(".m3u8")) {
+      console.log("FOUND M3U8 (request):", u);
+      foundM3U8.add(u);
     }
   });
 
@@ -28,31 +42,43 @@ const fs = require("fs");
   );
 
   try {
-    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90000 });
-
-    // انتظار أي iframe أو فيديو
-    await new Promise((r) => setTimeout(r, 5000));
-
-    // محاولة تشغيل الفيديو تلقائيًا
-    await page.evaluate(() => {
-      const video = document.querySelector("video");
-      if (video) {
-        video.muted = true;
-        video.play().catch(() => {});
-      }
+    await page.goto(url, {
+      waitUntil: "networkidle2",
+      timeout: 90000,
     });
 
-    // انتظار تحميل الشبكة بعد التشغيل
-    await new Promise((r) => setTimeout(r, 10000));
+    // انتظار تحميل الإطارات
+    await page.waitForTimeout(5000);
+
+    // البحث داخل جميع الـ iframes وتشغيل الفيديو إن وُجد
+    const frames = page.frames();
+    for (const frame of frames) {
+      try {
+        await frame.evaluate(() => {
+          const video = document.querySelector("video");
+          if (video) {
+            video.muted = true;
+            video.play().catch(() => {});
+          }
+        });
+      } catch (e) {}
+    }
+
+    // انتظار توليد روابط البث
+    await page.waitForTimeout(15000);
 
     if (!fs.existsSync("data")) fs.mkdirSync("data");
 
     fs.writeFileSync(
       "data/mbc_variety.json",
-      JSON.stringify({ link: foundM3U8 }, null, 2)
+      JSON.stringify(
+        { links: Array.from(foundM3U8) },
+        null,
+        2
+      )
     );
 
-    console.log("FINAL m3u8:", foundM3U8);
+    console.log("FINAL M3U8 LINKS:", Array.from(foundM3U8));
   } catch (err) {
     console.error("ERROR:", err);
   }
