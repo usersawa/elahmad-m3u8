@@ -13,18 +13,34 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}  # يسمح بالـ push
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install yt-dlp
+        run: |
+          sudo apt update
+          sudo apt install -y yt-dlp
+          yt-dlp --version
 
-      - name: Fetch M3U8 mbc_variety using Puppeteer
-        run: node fetch.js
+      - name: Fetch M3U8 using yt-dlp
+        run: |
+          node -e "
+          const { execSync } = require('child_process');
+          const fs = require('fs');
+          const url = 'https://www.elahmad.com/tv/live/shahid_shaka.php?id=mbc_max';
+          try {
+            const m3u8 = execSync(\`yt-dlp -g '\${url}'\`).toString().trim();
+            fs.writeFileSync('data/mbc_variety.json', JSON.stringify({ m3u8 }, null, 2));
+            console.log('Saved m3u8:', m3u8);
+          } catch(e) {
+            console.error('Failed to fetch m3u8:', e.message);
+            process.exit(1);
+          }
+          "
 
       - name: Commit and push changes
         run: |
